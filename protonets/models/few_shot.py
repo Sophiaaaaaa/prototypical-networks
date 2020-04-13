@@ -11,16 +11,16 @@ from .utils import euclidean_dist
 class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()
-
+	 
     def forward(self, x):
         return x.view(x.size(0), -1)
 
 class Protonet(nn.Module):
     def __init__(self, encoder):
         super(Protonet, self).__init__()
-        
+        # 编码特征
         self.encoder = encoder
-
+	 # 计算loss
     def loss(self, sample):
         xs = Variable(sample['xs']) # support
         xq = Variable(sample['xq']) # query
@@ -29,22 +29,28 @@ class Protonet(nn.Module):
         assert xq.size(0) == n_class
         n_support = xs.size(1)
         n_query = xq.size(1)
-
+			
+			# 生成一个[n_class, n_query, 1]的张量
         target_inds = torch.arange(0, n_class).view(n_class, 1, 1).expand(n_class, n_query, 1).long()
         target_inds = Variable(target_inds, requires_grad=False)
 
         if xq.is_cuda:
             target_inds = target_inds.cuda()
-
+			
+			# support和query拼在一起作为输入
         x = torch.cat([xs.view(n_class * n_support, *xs.size()[2:]),
                        xq.view(n_class * n_query, *xq.size()[2:])], 0)
-
+			
+			# 将support和query一起编码
         z = self.encoder.forward(x)
         z_dim = z.size(-1)
-
+			
+			# 生成prototype
         z_proto = z[:n_class*n_support].view(n_class, n_support, z_dim).mean(1)
-        zq = z[n_class*n_support:]
-
+        # 获取编码之后的query数据
+			zq = z[n_class*n_support:]
+			
+		   # query数据和prototype计算欧式距离
         dists = euclidean_dist(zq, z_proto)
 
         log_p_y = F.log_softmax(-dists, dim=1).view(n_class, n_query, -1)
