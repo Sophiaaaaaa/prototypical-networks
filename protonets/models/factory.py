@@ -1,5 +1,7 @@
 MODEL_REGISTRY = {}
 
+# define a dictionary for model
+
 def register_model(model_name):
     def decorator(f):
         MODEL_REGISTRY[model_name] = f
