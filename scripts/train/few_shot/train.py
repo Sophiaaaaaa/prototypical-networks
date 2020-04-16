@@ -56,9 +56,11 @@ def main(opt):
         model.cuda()
 
     engine = Engine()
-
+    
+    # torchnet.meter评估方法性能，这里用的平均值
+    # 先建立一个每个指标及其对应评价值的字典
     meters = { 'train': { field: tnt.meter.AverageValueMeter() for field in opt['log.fields'] } }
-
+    
     if val_loader is not None:
         meters['val'] = { field: tnt.meter.AverageValueMeter() for field in opt['log.fields'] }
 
