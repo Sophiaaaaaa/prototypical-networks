@@ -10,6 +10,7 @@ def main(opt):
     result_dir = os.path.dirname(opt['model.model_path'])
 
     # get target training loss to exceed
+    # get trace file
     trace_file = os.path.join(result_dir, 'trace.txt')
     trace_vals = load_trace(trace_file)
     best_epoch = trace_vals['val']['loss'].argmin()
