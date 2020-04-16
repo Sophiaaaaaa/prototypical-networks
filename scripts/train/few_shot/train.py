@@ -63,10 +63,11 @@ def main(opt):
     
     if val_loader is not None:
         meters['val'] = { field: tnt.meter.AverageValueMeter() for field in opt['log.fields'] }
-
+    
     def on_start(state):
         if os.path.isfile(trace_file):
             os.remove(trace_file)
+        # 定义学习率衰减机制
         state['scheduler'] = lr_scheduler.StepLR(state['optimizer'], opt['train.decay_every'], gamma=0.5)
     engine.hooks['on_start'] = on_start
 
