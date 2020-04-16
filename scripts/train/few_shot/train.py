@@ -69,20 +69,30 @@ def main(opt):
             os.remove(trace_file)
         # 定义学习率衰减机制
         state['scheduler'] = lr_scheduler.StepLR(state['optimizer'], opt['train.decay_every'], gamma=0.5)
+    # 将上面的函数赋给匿名函数engine.hooks
     engine.hooks['on_start'] = on_start
-
+    
+    # 每个epoch开始时
     def on_start_epoch(state):
         for split, split_meters in meters.items():
             for field, meter in split_meters.items():
-                meter.reset()
-        state['scheduler'].step()
+                # 重置评价指标
+						meter.reset()
+
+        # 调用optimizer的step()函数进行回传
+			state['scheduler'].step()
+    
+		# 用匿名函数包装
     engine.hooks['on_start_epoch'] = on_start_epoch
 
+    # 更新评价指标
     def on_update(state):
+        # 对于所有训练指标，更新每个训练指标的值
         for field, meter in meters['train'].items():
             meter.add(state['output'][field])
     engine.hooks['on_update'] = on_update
 
+    # 在每个epoch结束时，给出这个epoch的评价值
     def on_end_epoch(hook_state, state):
         if val_loader is not None:
             if 'best_loss' not in hook_state:
@@ -91,6 +101,7 @@ def main(opt):
                 hook_state['wait'] = 0
 
         if val_loader is not None:
+				# 使用val评价模型
             model_utils.evaluate(state['model'],
                                  val_loader,
                                  meters['val'],
