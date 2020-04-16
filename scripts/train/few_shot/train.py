@@ -18,10 +18,12 @@ import protonets.utils.model as model_utils
 import protonets.utils.log as log_utils
 
 def main(opt):
+		
     if not os.path.isdir(opt['log.exp_dir']):
         os.makedirs(opt['log.exp_dir'])
 
     # save opts
+    # 将opts加入文件中
     with open(os.path.join(opt['log.exp_dir'], 'opt.json'), 'w') as f:
         json.dump(opt, f)
         f.write('\n')
@@ -35,8 +37,10 @@ def main(opt):
     torch.manual_seed(1234)
     if opt['data.cuda']:
         torch.cuda.manual_seed(1234)
-
+    
+	  # 加载数据
     if opt['data.trainval']:
+        # load Omniglot dataset
         data = data_utils.load(opt, ['trainval'])
         train_loader = data['trainval']
         val_loader = None
