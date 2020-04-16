@@ -29,5 +29,7 @@ def main(opt):
         'data.trainval': True,
         'train.epochs': best_epoch + model_opt['train.patience'],
     })
+	 
 
+    # 使用以上获得的参数去运行run_train.py这个程序
     subprocess.call(['python', os.path.join(os.getcwd(), 'scripts/train/few_shot/run_train.py')] + format_opts(model_opt))
