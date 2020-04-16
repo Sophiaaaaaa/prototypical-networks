@@ -40,22 +40,25 @@ class Engine(object):
             for sample in tqdm(state['loader'], desc="Epoch {:d} train".format(state['epoch'] + 1)):
                 state['sample'] = sample
                 self.hooks['on_sample'](state)
-
+                # 梯度置零
                 state['optimizer'].zero_grad()
+                # 计算loss
                 loss, state['output'] = state['model'].loss(state['sample'])
                 self.hooks['on_forward'](state)
-
+                # 反向传播
                 loss.backward()
                 self.hooks['on_backward'](state)
-
+                # 进行优化
                 state['optimizer'].step()
 
                 state['t'] += 1
                 state['batch'] += 1
+                # 更新模型
                 self.hooks['on_update'](state)
 
             state['epoch'] += 1
             state['batch'] = 0
+            # 得到所有的评价指标
             self.hooks['on_end_epoch'](state)
 
         self.hooks['on_end'](state)
