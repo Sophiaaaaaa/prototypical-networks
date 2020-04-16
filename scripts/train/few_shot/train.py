@@ -48,7 +48,8 @@ def main(opt):
         data = data_utils.load(opt, ['train', 'val'])
         train_loader = data['train']
         val_loader = data['val']
-
+    
+    # 使用模型相关参数加载模型
     model = model_utils.load(opt)
 
     if opt['data.cuda']:
