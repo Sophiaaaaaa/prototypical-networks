@@ -5,6 +5,9 @@ import subprocess
 from protonets.utils import format_opts, merge_dict
 from protonets.utils.log import load_trace
 
+
+# 通过val找到最合适的参数，组建新的opt，进行训练
+
 def main(opt):
     # load model
     result_dir = os.path.dirname(opt['model.model_path'])
