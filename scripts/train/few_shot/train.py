@@ -113,7 +113,8 @@ def main(opt):
         with open(trace_file, 'a') as f:
             json.dump(meter_vals, f)
             f.write('\n')
-
+			
+			# 更新目前最好的loss
         if val_loader is not None:
             if meter_vals['val']['loss'] < hook_state['best_loss']:
                 hook_state['best_loss'] = meter_vals['val']['loss']
@@ -125,7 +126,9 @@ def main(opt):
                     state['model'].cuda()
 
                 hook_state['wait'] = 0
-            else:
+           
+				# early stop 
+				else:
                 hook_state['wait'] += 1
 
                 if hook_state['wait'] > opt['train.patience']:
@@ -140,10 +143,14 @@ def main(opt):
     engine.hooks['on_end_epoch'] = partial(on_end_epoch, { })
 
     engine.train(
-        model = model,
-        loader = train_loader,
-        optim_method = getattr(optim, opt['train.optim_method']),
-        optim_config = { 'lr': opt['train.learning_rate'],
+        # 传入模型
+			model = model,
+        # 传入训练数据
+			loader = train_loader,
+        # 传入优化方法的参数
+			optim_method = getattr(optim, opt['train.optim_method']),
+        # 传入优化的配置参数
+			optim_config = { 'lr': opt['train.learning_rate'],
                          'weight_decay': opt['train.weight_decay'] },
         max_epoch = opt['train.epochs']
     )
