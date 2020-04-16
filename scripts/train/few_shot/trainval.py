@@ -6,6 +6,7 @@ from protonets.utils import format_opts, merge_dict
 from protonets.utils.log import load_trace
 
 def main(opt):
+    # load model
     result_dir = os.path.dirname(opt['model.model_path'])
 
     # get target training loss to exceed
