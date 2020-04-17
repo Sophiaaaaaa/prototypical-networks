@@ -46,6 +46,8 @@ def load_class_images(d):
         if len(class_images) == 0:
             raise Exception("No images found for omniglot class {} at {}. Did you run download_omniglot.sh first?".format(d['class'], image_dir))
 
+         # ListDataset从图片列表中加载数据
+        # 数据处理
         image_ds = TransformDataset(ListDataset(class_images),
                                     compose([partial(convert_dict, 'file_name'),
                                              partial(load_image_path, 'file_name', 'data'),
@@ -53,18 +55,21 @@ def load_class_images(d):
                                              partial(scale_image, 'data', 28, 28),
                                              partial(convert_tensor, 'data')]))
 
+			# 所有数据放到一个batch内
         loader = torch.utils.data.DataLoader(image_ds, batch_size=len(image_ds), shuffle=False)
-
+        
+        # 取一个数据
         for sample in loader:
             OMNIGLOT_CACHE[d['class']] = sample['data']
             break # only need one sample because batch size equal to dataset length
-
+    # 返回类及类中的一个数据组成的字典
     return { 'class': d['class'], 'data': OMNIGLOT_CACHE[d['class']] }
 
+# 取一个episode的数据
 def extract_episode(n_support, n_query, d):
     # data: N x C x H x W
     n_examples = d['data'].size(0)
-
+    # n_query是-1则代表将除去support之外的所有数据都当作query
     if n_query == -1:
         n_query = n_examples - n_support
 
@@ -106,7 +111,7 @@ def load(opt, splits):
             n_episodes = opt['data.test_episodes']
         else:
             n_episodes = opt['data.train_episodes']
-        # 
+        # 定义了三个函数：class字典，加载类的一张图片，取一个episode的数据
         transforms = [partial(convert_dict, 'class'),
                       load_class_images,
                       partial(extract_episode, n_support, n_query)]
