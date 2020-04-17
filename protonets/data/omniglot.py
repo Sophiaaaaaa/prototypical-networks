@@ -34,12 +34,14 @@ def rotate_image(key, rot, d):
 def scale_image(key, height, width, d):
     d[key] = d[key].resize((height, width))
     return d
-
+ 
+# 获取每个类对应的图片
 def load_class_images(d):
     if d['class'] not in OMNIGLOT_CACHE:
+		  # 获取路径
         alphabet, character, rot = d['class'].split('/')
         image_dir = os.path.join(OMNIGLOT_DATA_DIR, 'data', alphabet, character)
-
+        # 获取指定路径下的所有图片
         class_images = sorted(glob.glob(os.path.join(image_dir, '*.png')))
         if len(class_images) == 0:
             raise Exception("No images found for omniglot class {} at {}. Did you run download_omniglot.sh first?".format(d['class'], image_dir))
