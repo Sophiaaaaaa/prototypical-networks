@@ -84,26 +84,27 @@ def load(opt, splits):
 
     ret = { }
     for split in splits:
+	      # 获取n_way
         if split in ['val', 'test'] and opt['data.test_way'] != 0:
             n_way = opt['data.test_way']
         else:
             n_way = opt['data.way']
-
+        # 获取support的数量
         if split in ['val', 'test'] and opt['data.test_shot'] != 0:
             n_support = opt['data.test_shot']
         else:
             n_support = opt['data.shot']
-
+        # 获取query的数量
         if split in ['val', 'test'] and opt['data.test_query'] != 0:
             n_query = opt['data.test_query']
         else:
             n_query = opt['data.query']
-
+        # 获取episode
         if split in ['val', 'test']:
             n_episodes = opt['data.test_episodes']
         else:
             n_episodes = opt['data.train_episodes']
-
+        # 
         transforms = [partial(convert_dict, 'class'),
                       load_class_images,
                       partial(extract_episode, n_support, n_query)]
