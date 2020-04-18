@@ -140,12 +140,15 @@ def load(opt, splits):
         
         # 对所有类划分support和query数据集
         ds = TransformDataset(ListDataset(class_names), transforms)
-
+        
+        
         if opt['data.sequential']:
             sampler = SequentialBatchSampler(len(ds))
+        # 每个episode随机取n_way个类别
         else:
             sampler = EpisodicBatchSampler(len(ds), n_way, n_episodes)
-
+        
+        # 封装数据，数据划分为多个episode
         # use num_workers=0, otherwise may receive duplicate episodes
         ret[split] = torch.utils.data.DataLoader(ds, batch_sampler=sampler, num_workers=0)
 
