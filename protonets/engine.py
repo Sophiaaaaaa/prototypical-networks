@@ -34,7 +34,7 @@ class Engine(object):
             state['model'].train()
             # 用state参数重置评价指标并且进行optimizer回传
             self.hooks['on_start_epoch'](state)
-            # 得到每个epoch的数据的条数
+            # 得到episode的数目
             state['epoch_size'] = len(state['loader'])
 
             for sample in tqdm(state['loader'], desc="Epoch {:d} train".format(state['epoch'] + 1)):
