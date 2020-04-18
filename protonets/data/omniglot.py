@@ -19,18 +19,22 @@ from protonets.data.base import convert_dict, CudaTransform, EpisodicBatchSample
 OMNIGLOT_DATA_DIR  = os.path.join(os.path.dirname(__file__), '../../data/omniglot')
 OMNIGLOT_CACHE = { }
 
+# 将图片放在一个字典中
 def load_image_path(key, out_field, d):
     d[out_field] = Image.open(d[key])
     return d
 
+# 将d[key]转化为tensor
 def convert_tensor(key, d):
     d[key] = 1.0 - torch.from_numpy(np.array(d[key], np.float32, copy=False)).transpose(0, 1).contiguous().view(1, d[key].size[0], d[key].size[1])
     return d
 
+# 将图像旋转rot角度
 def rotate_image(key, rot, d):
     d[key] = d[key].rotate(rot)
     return d
 
+# 统一图片大小
 def scale_image(key, height, width, d):
     d[key] = d[key].resize((height, width))
     return d
@@ -47,7 +51,7 @@ def load_class_images(d):
             raise Exception("No images found for omniglot class {} at {}. Did you run download_omniglot.sh first?".format(d['class'], image_dir))
 
          # ListDataset从图片列表中加载数据
-        # 数据处理
+        # 数据处理，包括旋转、创建字典、规范图片大小，转化为tensor
         image_ds = TransformDataset(ListDataset(class_images),
                                     compose([partial(convert_dict, 'file_name'),
                                              partial(load_image_path, 'file_name', 'data'),
@@ -60,8 +64,10 @@ def load_class_images(d):
         
         # 取一个数据
         for sample in loader:
+            # 将图片数据写入Omniglot_cache中
             OMNIGLOT_CACHE[d['class']] = sample['data']
             break # only need one sample because batch size equal to dataset length
+    
     # 返回类及类中的一个数据组成的字典
     return { 'class': d['class'], 'data': OMNIGLOT_CACHE[d['class']] }
 
@@ -112,8 +118,8 @@ def load(opt, splits):
         else:
             n_episodes = opt['data.train_episodes']
         # 定义了三个函数：class字典，加载类的一张图片，取一个episode的数据
-        transforms = [partial(convert_dict, 'class'),
-                      load_class_images,
+        transforms = [partial(convert_dict, 'class'), # 取key是class的字典内容
+                      load_class_images, # 取一个类中的一条数据
                       partial(extract_episode, n_support, n_query)]
         if opt['data.cuda']:
             transforms.append(CudaTransform())
