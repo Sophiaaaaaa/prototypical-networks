@@ -71,21 +71,26 @@ def load_class_images(d):
     # 返回类及类中的一个数据组成的字典
     return { 'class': d['class'], 'data': OMNIGLOT_CACHE[d['class']] }
 
-# 取一个episode的数据
+# 取每个类的一个episode的数据
 def extract_episode(n_support, n_query, d):
     # data: N x C x H x W
     n_examples = d['data'].size(0)
     # n_query是-1则代表将除去support之外的所有数据都当作query
     if n_query == -1:
         n_query = n_examples - n_support
-
+    
+    # 数据随机打乱之后，取support数据之和+query数据之和的数据量，返回的是index
     example_inds = torch.randperm(n_examples)[:(n_support+n_query)]
+    # 返回support数据的下标
     support_inds = example_inds[:n_support]
+    # 返回query数据的下标
     query_inds = example_inds[n_support:]
-
+    
+    # 形成support数据和query数据
     xs = d['data'][support_inds]
     xq = d['data'][query_inds]
 
+    # 获取每个类的support set和query set
     return {
         'class': d['class'],
         'xs': xs,
@@ -120,16 +125,20 @@ def load(opt, splits):
         # 定义了三个函数：class字典，加载类的一张图片，取一个episode的数据
         transforms = [partial(convert_dict, 'class'), # 取key是class的字典内容
                       load_class_images, # 取一个类中的一条数据
-                      partial(extract_episode, n_support, n_query)]
+                      partial(extract_episode, n_support, n_query)] # 获取每个类的support和query
+
         if opt['data.cuda']:
             transforms.append(CudaTransform())
 
         transforms = compose(transforms)
 
         class_names = []
+        # 按照分割数据集的方式，获取相应的所有类名
         with open(os.path.join(split_dir, "{:s}.txt".format(split)), 'r') as f:
             for class_name in f.readlines():
                 class_names.append(class_name.rstrip('\n'))
+        
+        # 对所有类划分support和query数据集
         ds = TransformDataset(ListDataset(class_names), transforms)
 
         if opt['data.sequential']:
